@@ -40,7 +40,7 @@ public class Setting {
 				+ "  `bArrival` VARCHAR(5) NULL DEFAULT NULL,\r\n"
 				+ "  `vTime` TIME NULL DEFAULT NULL,\r\n"
 				+ "  `bElapse` VARCHAR(10) NULL DEFAULT NULL,\r\n"
-				+ "  `vCOUnt` VARCHAR(1) NULL DEFAULT NULL,\r\n"
+				+ "  `vCount` VARCHAR(1) NULL DEFAULT NULL,\r\n"
 				+ "  `bPrice` INT(6) NULL DEFAULT NULL,\r\n"
 				+ "  PRIMARY KEY (`bNumber`))\r\n"
 				+ "ENGINE = InnoDB\r\n"
