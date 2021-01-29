@@ -49,17 +49,26 @@ public class ReservePanel extends JPanel{
 		add(flowPanel,BorderLayout.CENTER);
 	}
 	
+	
+	
+	
+	
 	private void seatSelect() {
 		if(monthBox.getSelectedIndex() == 0 || dayBox.getSelectedIndex() == 0) {
 			BaseFrame.informMessage("월 또는 일을 선택하여 주십시오.", "메시지");
 			return;
 		}
 		BaseFrame.warningMessage("예약이 시작됩니다.", "웹 페이지 메시지");
-		seatSelectPanel.getBusNumField().setText((String)busNumBox.getSelectedItem());
+		seatSelectPanel.getCarNumField().setText((String)busNumBox.getSelectedItem());
 		seatSelectPanel.getdDayField().setText((String)yearBox.getSelectedItem()+"-"+monthBox.getSelectedItem()+"-"+dayBox.getSelectedItem());
 		seatSelectPanel.getHoChaField().setText((String)busHoChaBox.getSelectedItem());
 		frame.changePanel("SeatSelect");
 	}
+	
+	
+	
+	
+	
 	
 	private void setDayBox() {
 		dayBox.removeAllItems();
@@ -74,9 +83,16 @@ public class ReservePanel extends JPanel{
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+			}finally {
+				BaseFrame.pstClose();
 			}
 //		}
 	}
+	
+	
+	
+	
+	
 	
 	private void setMonthBox() {
 		for(int i=0;i<3;i++) {

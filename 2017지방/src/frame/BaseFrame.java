@@ -109,6 +109,14 @@ public class BaseFrame extends JFrame{
 	
 	
 	
+	public static int Yes_No_Dialog(String caption,String title) {
+		return JOptionPane.showConfirmDialog(null, caption,title,JOptionPane.YES_NO_OPTION);
+	}
+	
+	
+	
+	
+	
 	
 	public static JLabel createLabel(JLabel label,Font font) {
 		label.setFont(font);

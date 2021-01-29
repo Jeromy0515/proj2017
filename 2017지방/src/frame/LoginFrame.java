@@ -17,6 +17,7 @@ public class LoginFrame extends BaseFrame{
 	private JTextField idField;
 	private JPasswordField pwField;
 	public static boolean division = true;
+	public static String id;
 	LoginFrame() {
 		super("로그인",300,180);
 		setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
@@ -53,11 +54,12 @@ public class LoginFrame extends BaseFrame{
 	}
 	
 		private void loginAct() {
+			id = idField.getText();
 			if(division) {
 				try (ResultSet rs = getSqlResults("SELECT * FROM tbl_customer WHERE cID=? AND cPW=?", idField.getText(),pwField.getText())){
 					if(rs.next()) {
 						informMessage("로그인 완료", "메시지");
-						selectLogin();
+						successLogin();
 					}else {
 						informMessage("없는 회원 입니다.다시 확인하여 주십시오.", "메시지");
 					}
@@ -66,12 +68,11 @@ public class LoginFrame extends BaseFrame{
 				}
 			}else {
 				informMessage("비회원으로 로그인 합니다.", "메시지");
-				selectLogin();
+				successLogin();
 			}
-
 		}
 		
-		private void selectLogin() {
+		private void successLogin() {
 			setVisible(false);
 			new MenuFrame().setVisible(true);
 		}

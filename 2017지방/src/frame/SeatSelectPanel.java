@@ -13,12 +13,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 public class SeatSelectPanel extends JPanel{
-	private JTextField busNumField,busNumField2,dDayField,dDayField2,hoChaField,seatNumField,idField;
+	private JTextField carNumField,carNumField2,dDayField,dDayField2,hoChaField,seatNumField,idField;
 	private JPanel centerPanel;
 	private DefaultTableModel model;
 	private JTable table;
@@ -33,31 +31,39 @@ public class SeatSelectPanel extends JPanel{
 		table = new JTable(model);
 		scrollPane = new JScrollPane(table);
 		
-		busNumField = new JTextField(10);
+		table.setRowHeight(30);
+		scrollPane.setPreferredSize(new Dimension(600,300));
+		BaseFrame.setTableColumnWidth(table,new int[]{80,5,80,5,5,80,5,80,5});
+		BaseFrame.tableAlign(table);
+		
+		
+		carNumField = new JTextField(10);
 		dDayField = new JTextField(10);
 		hoChaField = new JTextField(10);
 
 		centerPanel = new JPanel();
 		centerPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		centerPanel.add(BaseFrame.createLabel(new JLabel("차량번호"), null));
-		centerPanel.add(busNumField);
+		centerPanel.add(carNumField);
 		centerPanel.add(BaseFrame.createLabel(new JLabel("출발일자"), null));
 		centerPanel.add(dDayField);
 		centerPanel.add(BaseFrame.createLabel(new JLabel("호차번호"),null));
 		centerPanel.add(hoChaField);
-		centerPanel.add(BaseFrame.createButton("좌석조회", e->selectSeat()));
+		centerPanel.add(BaseFrame.createButton("좌석조회", e->showSeat()));
 		
-		busNumField2 = new JTextField(10);
+		carNumField2 = new JTextField(10);
 		dDayField2 = new JTextField(10);
 		seatNumField = new JTextField(10);
 		idField = new JTextField(10);
 				
+		idField.setText(LoginFrame.id);
+		
 		JPanel southPanel = new JPanel();
 		southPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		southPanel.add(BaseFrame.createLabel(new JLabel("출발일자"), null));
 		southPanel.add(dDayField2);
 		southPanel.add(BaseFrame.createLabel(new JLabel("차량번호"), null));
-		southPanel.add(busNumField2);
+		southPanel.add(carNumField2);
 		southPanel.add(BaseFrame.createLabel(new JLabel("좌석번호"), null));
 		southPanel.add(seatNumField);
 		southPanel.add(BaseFrame.createLabel(new JLabel("회원ID"), null));
@@ -80,10 +86,10 @@ public class SeatSelectPanel extends JPanel{
 	
 	private void setUnabledField() {
 		dDayField2.setText(dDayField.getText());
-		busNumField2.setText(busNumField.getText());
+		carNumField2.setText(carNumField.getText());
 		
 		dDayField2.setEnabled(false);
-		busNumField2.setEnabled(false);
+		carNumField2.setEnabled(false);
 	}
 	
 	
@@ -97,7 +103,7 @@ public class SeatSelectPanel extends JPanel{
 	
 	private void checkReservedSeat() {
 		ArrayList<Integer> getReservedSeat = new ArrayList<Integer>();
-		try (ResultSet rs = BaseFrame.getSqlResults("select bSeat from tbl_ticket where bNumber=? and bNumber2=? and bDate=?",busNumField.getText(),hoChaField.getText(),dDayField.getText() )){
+		try (ResultSet rs = BaseFrame.getSqlResults("select bSeat from tbl_ticket where bNumber=? and bNumber2=? and bDate=?",carNumField.getText(),hoChaField.getText(),dDayField.getText() )){
 			while(rs.next()) {
 				getReservedSeat.add(rs.getInt("bSeat"));
 			}
@@ -131,9 +137,6 @@ public class SeatSelectPanel extends JPanel{
 	
 	
 	private void setTableVisible(){
-		scrollPane.setPreferredSize(new Dimension(600,300));
-		BaseFrame.setTableColumnWidth(table,new int[]{80,5,80,5,5,80,5,80,5});
-		BaseFrame.tableAlign(table);
 		setUnabledField();
 		checkReservedSeat();
 		centerPanel.add(scrollPane);
@@ -148,7 +151,7 @@ public class SeatSelectPanel extends JPanel{
 	
 	
 	
-	private void selectSeat() {
+	private void showSeat() {
 		setTableVisible();
 	}
 	
@@ -201,17 +204,81 @@ public class SeatSelectPanel extends JPanel{
 	
 	
 	private void reserveSeat() {
+		
+		String reservedSeat = "";
+		String overlapSeat = "";
+		String getSeatNums = "";
+		int nextCnt = 0;
+		int overlapCnt = 0;
 		if(seatNumField.getText().equals("")) {
 			BaseFrame.informMessage("좌석번호를 입력해주세요", "메시지");
+			return;
 		}else{
 			try {
-				BaseFrame.withoutSqlResult("select ", busNumField2.getText(),dDayField2.getText(),seatNumField.getText().split(", |,| "));
+				for(String seatNums:seatNumField.getText().split(", |,| ")) {
+					for(String arr:getSeatNums.split("")) {
+						if(arr.equals(seatNums)) {
+							overlapCnt++;
+							if(overlapCnt > 1) {
+								overlapSeat += ", "+seatNums;
+							}else {
+								overlapSeat += seatNums;
+							}
+							break;
+						}
+						getSeatNums += seatNums;
+					}
+					Integer.parseInt(seatNums);// 좌석정보에 숫자만 입력했는지 체크 숫자외 다른 문자 입력시 catch에서 잡아냄
+					try (ResultSet rs = BaseFrame.getSqlResults("select * from tbl_ticket where bDate=? and bNumber=? and bSeat=?",dDayField2.getText(), carNumField2.getText(),seatNums)){
+						if(rs.next()) {
+							nextCnt++;
+							if(nextCnt>1) {
+								reservedSeat += ", "+seatNums;
+							}else {
+								reservedSeat += seatNums;
+							}
+						}
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}finally {
+						BaseFrame.pstClose();
+					}
+				}
 				
+				if(overlapCnt > 0) {
+					BaseFrame.warningMessage("좌석번호 "+overlapSeat+"이(가) 중복입력되었습니다.","메시지");
+				}
+				
+				
+				if(nextCnt > 0) {
+					BaseFrame.warningMessage("좌석번호 "+reservedSeat+"은 이미 예약되어 있는 좌석입니다.", "메시지");
+					return;
+				}
 				
 			}catch (Exception e) {
 				BaseFrame.informMessage("올바르지 못한 좌석정보입니다.", "메시지");
+				return;
 			}
 		}
+		
+		if(BaseFrame.Yes_No_Dialog("차량번호["+carNumField2.getText()+"]\n예약일자["+dDayField2.getText()+"]\n좌석번호["+seatNumField.getText()+"]\n고객번호["+idField.getText()+"]\n예약하시겠습니까?", "웹 페이지 메시지") == 0) {
+			try {
+				for(String seatNums:seatNumField.getText().split(", |,| ")) {
+					BaseFrame.withoutSqlResult("insert into tbl_ticket values(?,?,?,?,?,(select bPrice from tbl_bus where bNumber=?),?)" ,dDayField.getText(),carNumField.getText(),hoChaField.getText(),seatNums,idField.getText(),carNumField.getText(),"X");
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			BaseFrame.warningMessage("차량번호["+carNumField2.getText()+"]\n예약일자["+dDayField2.getText()+"]\n좌석번호["+seatNumField.getText()+"]\n고객번호["+idField.getText()+"]\n예약되었습니다.", "웹 페이지 메시지");
+		}
+		
+		
+		
+		
+		
+		
+		
+		
 		
 	}
 	
@@ -219,8 +286,8 @@ public class SeatSelectPanel extends JPanel{
 	
 	
 	
-	public JTextField getBusNumField() {
-		return busNumField;
+	public JTextField getCarNumField() {
+		return carNumField;
 	}
 	
 	

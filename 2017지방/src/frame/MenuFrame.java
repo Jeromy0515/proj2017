@@ -31,7 +31,7 @@ public class MenuFrame extends BaseFrame{
 		 northPanel.add(createButton(new JButton("예약신청"), e -> changePanel("Reserve")));
 		 northPanel.add(createButton(new JButton("차량좌석조회"), e->changePanel("SeatSelect")));
 		 northPanel.add(createButton(new JButton("승차권발매"), e->changePanel("Buy")));
-		 northPanel.add(createButton(new JButton("예약조회"), null));
+		 northPanel.add(createButton(new JButton("예약조회"), e->changePanel("Reservation")));
 		 
 		 centerPanel.setLayout(card);
 		 centerPanel.add("Blank",new JPanel()); // blank Panel
@@ -40,14 +40,13 @@ public class MenuFrame extends BaseFrame{
 		 TicketBuyPanel ticketBuyPanel = new TicketBuyPanel(); //승차권발매
 		 SeatSelectPanel seatSelectPanel = new SeatSelectPanel(this); //차량좌석조회
 		 ReservePanel reservePanel = new ReservePanel(this,seatSelectPanel); //예약신청
+		 ReservationSelectPanel reservationPanel = new ReservationSelectPanel();
 		 
 		 centerPanel.add("CarInform", carInformPanel);
 		 centerPanel.add("Reserve", reservePanel);
 		 centerPanel.add("SeatSelect", seatSelectPanel);
 		 centerPanel.add("Buy",ticketBuyPanel);
-//		 centerPanel.add("CarSelect",new CarSelectPanel(this));
-//		 centerPanel.add("Reserve",new ReservePanel(this));
-//		 centerPanel.add("SeatSelect",new SeatSelectPanel(this));
+		 centerPanel.add("Reservation", reservationPanel);
 		 
 		 add(northPanel,BorderLayout.NORTH);
 		 add(centerPanel,BorderLayout.CENTER);
